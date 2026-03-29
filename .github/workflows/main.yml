@@ -1,7 +1,7 @@
-name: Build iOS IPA
+name: Build iOS App
 
 on:
-  workflow_dispatch: # Memungkinkan kamu menjalankan build secara manual
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,16 +15,21 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.x' # Menggunakan versi 3 terbaru
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build IPA
-        run: flutter build ipa --no-codesign
+      - name: Build iOS Frameworks
+        run: flutter build ios --release --no-codesign
 
-      - name: Upload IPA Artifact
+      - name: Create Payload Folder
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r financial_app.ipa Payload
+          
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: financial-app-ios
-          path: build/ios/ipa/*.ipa
+          path: financial_app.ipa
